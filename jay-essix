@@ -1,0 +1,82 @@
+#!/usr/bin/env node
+
+var
+  ndjson= require("ndjson")
+
+const defaults= {
+	env: process.env,
+	clone: true,
+	attr: function(args){
+		// first arg becomes attribute
+		var attr= args[0]
+		if(attr instanceof Function){
+			attr= attr.call(this)
+		}
+		if(attr && this.clone){
+			var clone= {}
+			for(var i in attr){
+				clone[i]= attr[i]
+			}
+			attr= clone
+		}
+
+		// load default this.env
+		for(var i in this.env){
+			if(attr[i] === undefined){
+				attr[i]= this.env[i]
+			}
+		}
+		return attr
+	},
+	stdin: process.stdin,
+	children: function(){
+		return this.stdin.pipe(ndjson.parse())
+	},
+	afterAccept: function(je){
+		je.opts= this
+	}
+}
+
+function JayEssix(opts){
+	var
+	  opts= opts|| {}
+	for(var i in defaults){
+		if(!opts[i]){
+			opts[i]= defaults[i]
+		}
+	}
+	function accept(fn){
+		function JayEssixProcess(){
+			var
+			  attr= opts.attr(arguments),
+			  children= opts.children(arguments),
+			  val= fn.call(this, attr, children)
+			return val
+		}
+		if(opts.afterAccept){
+			opts.afterAccept(fn)
+		}
+		return JayEssixProcess
+	}
+	return accept
+}
+
+module.exports= JayEssix
+module.exports.JayEssix= JayEssix
+module.exports.default= JayEssix
+module.exports.defaults= defaults
+
+if(typeof require !== "undefined" && typeof module !== "undefined" && require.main === module){
+	var
+	  path= require("path"),
+	  file= process.argv[2]
+	if(file){
+		if(!path.isAbsolute(file)){
+			file = "." + path.sep + file
+		}
+	}
+	var
+	  fn= require(file),
+	  args= process.argv.splice(3),
+	  result= JayEssix(fn)(args)
+}
