@@ -1,0 +1,21 @@
+{
+	"name": "jay-essix",
+	"version": "1.0.0",
+	"description": "A attr, children contract for function calling.",
+	"main": "jay-essix",
+	"bins": {
+		"jay-essix": "jay-essix"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://archive.voodoowarez.com/jay-essix"
+	},
+	"author": "rektide de la faye",
+	"license": "X",
+	"dependencies": {
+		"ndjson": "^1.4.3"
+	}
+}
